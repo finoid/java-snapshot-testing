@@ -72,7 +72,7 @@ public class JacksonSnapshotSerializer implements SnapshotSerializer {
     }
 
     /**
-     * Override to control the registration of all available jackson modules within the classpath
+     * Override to control the registration of all available jackson2 modules within the classpath
      * which are locatable via JDK ServiceLoader facility, along with module-provided SPI.
      */
     protected boolean shouldFindAndRegisterModules() {

@@ -1,0 +1,5 @@
+io.github.finoid.snapshots.jackson3.docs.CustomSerializerTest.test1=[
+  {
+    "somethingElse" : "This should render"
+  }
+]
