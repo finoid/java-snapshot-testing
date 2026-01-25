@@ -1,11 +1,8 @@
-version: 2,
+version: 2
 updates:
-  - package-ecosystem: "gradle"
+  - package-ecosystem: maven
     directory: "/"
     schedule:
-      interval: "weekly"
-      day: "friday"
-    assignees:
-      - "jackmatt2"
-    labels:
-      - "dependencies"
+      interval: daily
+      time: "21:00"
+    open-pull-requests-limit: 10
