@@ -1,12 +1,12 @@
 package io.github.finoid.snapshots.jackson3.serializers.v1;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import io.github.finoid.snapshots.Snapshot;
 import io.github.finoid.snapshots.SnapshotSerializerContext;
 import io.github.finoid.snapshots.exceptions.SnapshotExtensionException;
 import io.github.finoid.snapshots.serializers.SerializerType;
 import io.github.finoid.snapshots.serializers.SnapshotSerializer;
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.JsonInclude;
 import tools.jackson.core.util.DefaultIndenter;
 import tools.jackson.core.util.DefaultPrettyPrinter;
 import tools.jackson.core.util.Separators;
@@ -20,12 +20,13 @@ import java.util.List;
 @SuppressWarnings("checkstyle:all") // TODO (nw) rewrite
 public class JacksonSnapshotSerializer implements SnapshotSerializer {
     static DefaultPrettyPrinter.Indenter lfOnlyIndenter = new DefaultIndenter("  ", "\n");
+
     private static final DefaultPrettyPrinter pp = new DefaultPrettyPrinter() {
         {
             this.indentArraysWith(lfOnlyIndenter);
             this.indentObjectsWith(lfOnlyIndenter);
 
-            Separators separators = Separators.createDefaultInstance()
+            final Separators separators = Separators.createDefaultInstance()
                 .withRootSeparator("");
             this.withSeparators(separators);
         }
@@ -35,7 +36,8 @@ public class JacksonSnapshotSerializer implements SnapshotSerializer {
         public DefaultPrettyPrinter createInstance() {
             return new DefaultPrettyPrinter(this);
         }
-    }.withArrayIndenter(lfOnlyIndenter);
+    };
+
     private final JsonMapper jsonMapper = createMapper();
 
     private JsonMapper createMapper() {
@@ -80,14 +82,14 @@ public class JacksonSnapshotSerializer implements SnapshotSerializer {
     }
 
     @Override
-    public Snapshot apply(Object object, SnapshotSerializerContext gen) {
+    public Snapshot apply(final Object object, final SnapshotSerializerContext gen) {
         try {
-            List<?> objects = Collections.singletonList(object);
+            final List<?> objects = Collections.singletonList(object);
 
-            String body = jsonMapper.writerWithDefaultPrettyPrinter()
+            final String body = jsonMapper.writerWithDefaultPrettyPrinter()
                 .writeValueAsString(objects);
             return gen.toSnapshot(body);
-        } catch (Exception e) {
+        } catch (final Exception e) {
             throw new SnapshotExtensionException("Jackson Serialization failed", e);
         }
     }
