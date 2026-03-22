@@ -1,0 +1,38 @@
+io.github.finoid.snapshots.junit5.SnapshotParameterUnitTest.givenParameterizedTestDataAndExpectInstanceVariable_whenMatchingSnapshots_thenAllMatch=[
+Duplicates are OK
+]
+
+
+io.github.finoid.snapshots.junit5.SnapshotParameterUnitTest.givenParameterizedTestDataAndExpectInstanceVariable_whenMatchingSnapshots_thenAllMatch[Scenario1]=[
+Additional snapshots need to include a scenario
+]
+
+
+io.github.finoid.snapshots.junit5.SnapshotParameterUnitTest.givenParameterizedTestDataAndExpectInstanceVariable_whenMatchingSnapshots_thenAllMatch[Scenario2]=[
+  "test input 1"
+]
+
+
+io.github.finoid.snapshots.junit5.SnapshotParameterUnitTest.givenParameterizedTestDataAndExpectInstanceVariable_whenMatchingSnapshots_thenAllMatch[Scenario3]=[
+  "test input 2"
+]
+
+
+io.github.finoid.snapshots.junit5.SnapshotParameterUnitTest.givenParameterizedTestDataAndExpectParameter_whenMatchingSnapshots_thenAllMatch=[
+Duplicates are OK
+]
+
+
+io.github.finoid.snapshots.junit5.SnapshotParameterUnitTest.givenParameterizedTestDataAndExpectParameter_whenMatchingSnapshots_thenAllMatch[Scenario1]=[
+Additional snapshots need to include a scenario
+]
+
+
+io.github.finoid.snapshots.junit5.SnapshotParameterUnitTest.givenParameterizedTestDataAndExpectParameter_whenMatchingSnapshots_thenAllMatch[Scenario2]=[
+  "test input 1"
+]
+
+
+io.github.finoid.snapshots.junit5.SnapshotParameterUnitTest.givenParameterizedTestDataAndExpectParameter_whenMatchingSnapshots_thenAllMatch[Scenario3]=[
+  "test input 2"
+]

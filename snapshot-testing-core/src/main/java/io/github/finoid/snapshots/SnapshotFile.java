@@ -4,19 +4,14 @@ import lombok.Getter;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.Collections;
-import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.TreeSet;
@@ -24,45 +19,28 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Slf4j
-@SuppressWarnings("checkstyle:all") // TODO (nw) rewrite
 public class SnapshotFile {
-
     public static final String SPLIT_STRING = "\n\n\n";
 
     private final String fileName;
-    private final Class<?> testClass;
     @Getter
-    private Set<Snapshot> snapshots = Collections.synchronizedSortedSet(new TreeSet<>());
-    private Set<Snapshot> debugSnapshots = Collections.synchronizedSortedSet(new TreeSet<>());
+    private final Set<Snapshot> snapshots = Collections.synchronizedSortedSet(new TreeSet<>());
+    private final Set<Snapshot> debugSnapshots = Collections.synchronizedSortedSet(new TreeSet<>());
 
     public SnapshotFile(String srcDirPath, String fileName, Class<?> testClass) throws IOException {
-        this.testClass = testClass;
         this.fileName = srcDirPath + File.separator + fileName;
-        log.info("Snapshot File: " + this.fileName);
+        log.info("Snapshot File: {}", this.fileName);
 
-        StringBuilder fileContent = new StringBuilder();
-
-        try (BufferedReader br =
-                 new BufferedReader(
-                     new InputStreamReader(new FileInputStream(this.fileName), StandardCharsets.UTF_8))) {
-
-            String currentLine;
-
-            while ((currentLine = br.readLine()) != null) {
-                fileContent.append(currentLine + "\n");
+        final Path path = Paths.get(this.fileName);
+        if (Files.exists(path)) {
+            String fileText = Files.readString(path, StandardCharsets.UTF_8);
+            if (!fileText.isBlank()) {
+                snapshots.addAll(
+                    Stream.of(fileText.split(SPLIT_STRING))
+                        .map(String::trim)
+                        .map(Snapshot::parse)
+                        .collect(Collectors.toCollection(TreeSet::new)));
             }
-
-            String fileText = fileContent.toString();
-            if (!"".equals(fileText.trim())) {
-                snapshots =
-                    Collections.synchronizedSortedSet(
-                        Stream.of(fileContent.toString().split(SPLIT_STRING))
-                            .map(String::trim)
-                            .map(Snapshot::parse)
-                            .collect(Collectors.toCollection(TreeSet::new)));
-            }
-        } catch (IOException e) {
-            // ...
         }
 
         deleteDebugFile();
@@ -73,68 +51,59 @@ public class SnapshotFile {
     }
 
     public File createDebugFile(Snapshot snapshot) {
-        File file = null;
+        Path debugPath = Paths.get(getDebugFilename());
         try {
-            file = new File(getDebugFilename());
-            file.getParentFile().mkdirs();
-            file.createNewFile();
-
-            try (FileOutputStream fileStream = new FileOutputStream(file, false)) {
-                fileStream.write(snapshot.raw().getBytes(StandardCharsets.UTF_8));
-            } catch (IOException e) {
-                throw new RuntimeException("Unable to create debug file ", e);
-            }
+            Files.createDirectories(debugPath.getParent());
+            Files.writeString(debugPath, snapshot.raw(), StandardCharsets.UTF_8);
         } catch (IOException e) {
-            throw new RuntimeException("Unable to create debug file ", e);
+            throw new RuntimeException("Unable to create debug file", e);
         }
-
-        return file;
+        return debugPath.toFile();
     }
 
-    @SneakyThrows
     public void deleteDebugFile() {
-        Files.deleteIfExists(Paths.get(getDebugFilename()));
-    }
-
-    @SneakyThrows
-    public void delete() {
-        Files.deleteIfExists(Paths.get(this.fileName));
-    }
-
-    @SneakyThrows
-    public synchronized File createFileIfNotExists(String fileName) {
-        Path path = Paths.get(fileName);
-        if (!Files.exists(path)) {
-            Files.createDirectories(path.getParent());
-            Files.createFile(path);
+        try {
+            Files.deleteIfExists(Paths.get(getDebugFilename()));
+        } catch (IOException e) {
+            log.warn("Unable to delete debug file: {}", getDebugFilename(), e);
         }
-        return path.toFile();
     }
 
-    @SuppressWarnings("SynchronizeOnNonFinalField") // TODO (nw) rewrite
+    public void delete() {
+        try {
+            Files.deleteIfExists(Paths.get(this.fileName));
+        } catch (IOException e) {
+            log.warn("Unable to delete snapshot file: {}", this.fileName, e);
+        }
+    }
+
+    private void updateFile(String fileName, Set<Snapshot> snapshotsToUpdate) {
+        Path path = Paths.get(fileName);
+        try {
+            Files.createDirectories(path.getParent());
+            String content;
+            synchronized (snapshotsToUpdate) {
+                content = snapshotsToUpdate.stream()
+                    .map(Snapshot::raw)
+                    .collect(Collectors.joining(SPLIT_STRING));
+            }
+            Files.writeString(path, content, StandardCharsets.UTF_8);
+        } catch (IOException e) {
+            throw new RuntimeException("Unable to write file: " + fileName, e);
+        }
+    }
+
     public void pushSnapshot(Snapshot snapshot) {
         synchronized (snapshots) {
             snapshots.add(snapshot);
-            Set<String> rawSnapshots =
-                snapshots.stream().map(Snapshot::raw).collect(Collectors.toCollection(TreeSet::new));
-            updateFile(this.fileName, rawSnapshots);
+            updateFile(this.fileName, snapshots);
         }
     }
 
-    public synchronized void pushDebugSnapshot(Snapshot snapshot) {
-        debugSnapshots.add(snapshot);
-        Set<String> rawDebugSnapshots =
-            debugSnapshots.stream().map(Snapshot::raw).collect(Collectors.toCollection(TreeSet::new));
-        updateFile(getDebugFilename(), rawDebugSnapshots);
-    }
-
-    private void updateFile(String fileName, Set<String> rawSnapshots) {
-        File file = createFileIfNotExists(fileName);
-        try (FileOutputStream fileStream = new FileOutputStream(file, false)) {
-            byte[] myBytes = String.join(SPLIT_STRING, rawSnapshots).getBytes(StandardCharsets.UTF_8);
-            fileStream.write(myBytes);
-        } catch (IOException e) {
-            throw new RuntimeException("Unable to write debug file ", e);
+    public void pushDebugSnapshot(Snapshot snapshot) {
+        synchronized (debugSnapshots) {
+            debugSnapshots.add(snapshot);
+            updateFile(getDebugFilename(), debugSnapshots);
         }
     }
 
@@ -149,25 +118,21 @@ public class SnapshotFile {
             if (Files.size(path) == 0) {
                 delete();
             } else {
-                String content =
-                    new String(Files.readAllBytes(Paths.get(this.fileName)), StandardCharsets.UTF_8);
-                Files.write(
-                    path, content.getBytes(StandardCharsets.UTF_8), StandardOpenOption.TRUNCATE_EXISTING);
+                String content = Files.readString(path, StandardCharsets.UTF_8);
+                Files.writeString(path, content, StandardCharsets.UTF_8, StandardOpenOption.TRUNCATE_EXISTING);
             }
         }
     }
 
-    @SneakyThrows
-    private boolean snapshotsAreTheSame() {
-        Path path = Paths.get(this.getDebugFilename());
-        if (Files.exists(path)) {
-            List<String> snapshotFileContent =
-                Files.readAllLines(Paths.get(this.fileName), StandardCharsets.UTF_8);
-            List<String> debugSnapshotFileContent =
-                Files.readAllLines(Paths.get(this.getDebugFilename()), StandardCharsets.UTF_8);
-            return Objects.equals(snapshotFileContent, debugSnapshotFileContent);
+    private boolean snapshotsAreTheSame() throws IOException {
+        Path snapshotPath = Paths.get(this.fileName);
+        Path debugPath = Paths.get(this.getDebugFilename());
+        if (Files.exists(debugPath)) {
+            return Objects.equals(
+                Files.readString(snapshotPath, StandardCharsets.UTF_8),
+                Files.readString(debugPath, StandardCharsets.UTF_8)
+            );
         }
-
         return false;
     }
 }

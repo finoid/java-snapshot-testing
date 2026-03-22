@@ -7,25 +7,27 @@ import io.github.finoid.snapshots.serializers.SnapshotSerializer;
 import io.github.finoid.snapshots.serializers.ToStringSnapshotSerializer;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
+import org.jspecify.annotations.Nullable;
 
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-@SuppressWarnings("NullAway") // TODO (nw) refactor
 @RequiredArgsConstructor
 public class Expect {
     private final SnapshotVerifier snapshotVerifier;
     private final Method testMethod;
     private final Map<String, String> headers = new HashMap<>();
-    private SnapshotSerializer snapshotSerializer;
-    private SnapshotComparator snapshotComparator;
-    private List<SnapshotReporter> snapshotReporters;
-    private String scenario;
+    private final Map<String, Object> masks = new LinkedHashMap<>();
+    private @Nullable SnapshotSerializer snapshotSerializer;
+    private @Nullable SnapshotComparator snapshotComparator;
+    private @Nullable List<SnapshotReporter> snapshotReporters;
+    private @Nullable String scenario;
 
-    public static Expect of(SnapshotVerifier snapshotVerifier, Method method) {
+    public static Expect of(final SnapshotVerifier snapshotVerifier, final Method method) {
         return new Expect(snapshotVerifier, method);
     }
 
@@ -38,8 +40,8 @@ public class Expect {
      *
      * @param object snapshot object
      */
-    public void toMatchSnapshot(Object object) {
-        SnapshotContext snapshotContext = snapshotVerifier.expectCondition(testMethod, object);
+    public void toMatchSnapshot(final Object object) {
+        final SnapshotContext snapshotContext = snapshotVerifier.expectCondition(testMethod, object);
         if (snapshotSerializer != null) {
             snapshotContext.setSnapshotSerializer(snapshotSerializer);
         }
@@ -53,10 +55,33 @@ public class Expect {
             snapshotContext.setScenario(scenario);
         }
         snapshotContext.getHeader().putAll(headers);
+        snapshotContext.getMasks().putAll(masks);
 
         snapshotContext.checkValidContext();
 
         snapshotContext.toMatchSnapshot();
+    }
+
+    /**
+     * Mask a field in the snapshot using JSON Path.
+     *
+     * @param path JSON Path to mask
+     * @return Expect
+     */
+    public Expect mask(String path) {
+        return mask(path, "***REDACTED***");
+    }
+
+    /**
+     * Mask a field in the snapshot using JSON Path with a custom mask value.
+     *
+     * @param path      JSON Path to mask
+     * @param maskValue custom mask value
+     * @return Expect
+     */
+    public Expect mask(String path, Object maskValue) {
+        masks.put(path, maskValue);
+        return this;
     }
 
     /**
@@ -127,7 +152,7 @@ public class Expect {
      * @param name the {name} attribute comparator.{name} from snapshot.properties
      * @return Snapshot
      */
-    public Expect comparator(String name) {
+    public Expect comparator(final String name) {
         this.snapshotComparator = SnapshotProperties.getInstance("comparator." + name);
         return this;
     }
@@ -139,7 +164,7 @@ public class Expect {
      * @param reporters your custom reporters
      * @return Snapshot
      */
-    public Expect reporters(SnapshotReporter... reporters) {
+    public Expect reporters(final SnapshotReporter... reporters) {
         this.snapshotReporters = Arrays.asList(reporters);
         return this;
     }
@@ -151,7 +176,7 @@ public class Expect {
      * @param name the {name} attribute reporters.{name} from snapshot.properties
      * @return Snapshot
      */
-    public Expect reporters(String name) {
+    public Expect reporters(final String name) {
         this.snapshotReporters = SnapshotProperties.getInstances("reporters." + name);
         return this;
     }
@@ -166,7 +191,7 @@ public class Expect {
      * @param value value
      * @return Expect
      */
-    public Expect header(String key, String value) {
+    public Expect header(final String key, final String value) {
         headers.put(key, value);
         return this;
     }

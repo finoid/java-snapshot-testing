@@ -15,7 +15,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @SuppressWarnings("deprecation") // TODO (nw) rewrite
 public class DeterministicJacksonSnapshotSerializer extends JacksonSnapshotSerializer {
     @Override
-    public void configure(ObjectMapper objectMapper) {
+    protected boolean shouldSortCollections() {
+        return true;
+    }
+
+    @Override
+    public void configure(final ObjectMapper objectMapper) {
+
         objectMapper.enable(MapperFeature.SORT_PROPERTIES_ALPHABETICALLY);
         objectMapper.registerModule(new DeterministicCollectionModule());
     }

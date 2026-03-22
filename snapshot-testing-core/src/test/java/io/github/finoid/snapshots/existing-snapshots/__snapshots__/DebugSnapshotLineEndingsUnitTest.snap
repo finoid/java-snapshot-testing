@@ -1,0 +1,4 @@
+io.github.finoid.snapshots.DebugSnapshotLineEndingsUnitTest.givenMatchingSnapshotWithDifferentLineEndings_whenValidatingSnapshots_thenDebugFileIsNotCreated=[
+a
+b
+]

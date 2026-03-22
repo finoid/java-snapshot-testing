@@ -1,6 +1,8 @@
 package io.github.finoid.snapshots.serializers;
 
-import io.github.finoid.snapshots.logging.LoggingHelper;
+import io.github.finoid.snapshots.Snapshot;
+import io.github.finoid.snapshots.SnapshotFile;
+import io.github.finoid.snapshots.SnapshotSerializerContext;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -9,13 +11,21 @@ import lombok.extern.slf4j.Slf4j;
  * <p>Will render each toString() on a separate line
  */
 @Slf4j
-@Deprecated
-public class ToStringSnapshotSerializer
-    extends io.github.finoid.snapshots.serializers.v1.ToStringSnapshotSerializer {
-    public ToStringSnapshotSerializer() {
-        super();
-        LoggingHelper.deprecatedV5(
-            log,
-            "Update to `v1.serializers.io.github.finoid.snapshots.ToStringSnapshotSerializer` in `snapshot.properties`");
+public class ToStringSnapshotSerializer implements SnapshotSerializer {
+
+    @Override
+    public Snapshot apply(Object object, SnapshotSerializerContext gen) {
+        String body = "[\n" + object.toString() + "\n]";
+        if (body.contains(SnapshotFile.SPLIT_STRING)) {
+            log.warn(
+                "Found 3 consecutive lines in your snapshot \\n\\n\\n. This sequence is reserved as the snapshot separator - replacing with \\n.\\n.\\n");
+            body = body.replaceAll(SnapshotFile.SPLIT_STRING, "\n.\n.\n");
+        }
+        return gen.toSnapshot(body);
+    }
+
+    @Override
+    public String getOutputFormat() {
+        return SerializerType.TEXT.name();
     }
 }

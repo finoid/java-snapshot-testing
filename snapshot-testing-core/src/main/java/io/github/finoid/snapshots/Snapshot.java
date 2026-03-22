@@ -2,31 +2,28 @@ package io.github.finoid.snapshots;
 
 import io.github.finoid.snapshots.exceptions.LogGithubIssueException;
 import lombok.Builder;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
+import lombok.Value;
+import org.jspecify.annotations.Nullable;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-@EqualsAndHashCode
-@Builder
-@Getter
-@RequiredArgsConstructor
+@Value
+@Builder(toBuilder = true)
 public class Snapshot implements Comparable<Snapshot> {
+    private static final Pattern SNAPSHOT_PATTERN = Pattern.compile(
+        "^(?<name>.*?)(\\[(?<scenario>[^]]*)])?=(?<header>\\{[^}]*?})?(?<snapshot>(.*)$)",
+        Pattern.DOTALL
+    );
 
-    private final String name;
-    private final String scenario;
-    private final SnapshotHeader header;
-    private final String body;
+    String name;
+    @Nullable String scenario;
+    SnapshotHeader header;
+    String body;
 
     public static Snapshot parse(String rawText) {
-        String regex =
-            "^(?<name>.*?)(\\[(?<scenario>[^]]*)])?=(?<header>\\{[^}]*?})?(?<snapshot>(.*)$)";
-        Pattern p = Pattern.compile(regex, Pattern.DOTALL);
-        Matcher m = p.matcher(rawText);
-        boolean found = m.find();
-        if (!found) {
+        Matcher m = SNAPSHOT_PATTERN.matcher(rawText);
+        if (!m.find()) {
             throw new LogGithubIssueException(
                 "Corrupt Snapshot (REGEX matches = 0): possibly due to manual editing or our REGEX failing\n"
                     + "Possible Solutions\n"
@@ -57,7 +54,8 @@ public class Snapshot implements Comparable<Snapshot> {
 
     @Override
     public int compareTo(Snapshot other) {
-        return (name + scenario).compareTo(other.name + other.scenario);
+        return (name + (scenario == null ? "" : scenario))
+            .compareTo(other.name + (other.scenario == null ? "" : other.scenario));
     }
 
     public String getIdentifier() {
@@ -70,7 +68,7 @@ public class Snapshot implements Comparable<Snapshot> {
      * @return raw snapshot
      */
     public String raw() {
-        String headerJson = (header == null) || (header.size() == 0) ? "" : header.toJson();
+        String headerJson = (header == null) || header.isEmpty() ? "" : header.toJson();
         return getIdentifier() + "=" + headerJson + body;
     }
 

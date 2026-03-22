@@ -1,0 +1,8 @@
+{
+  "track_id": "circular_refs_20260319",
+  "type": "feature",
+  "status": "new",
+  "created_at": "2026-03-19T10:00:00Z",
+  "updated_at": "2026-03-19T10:00:00Z",
+  "description": "Add support for handling of circular references when serializing an object (based on POC in io.github.finoid.snapshots.jackson3.serializers.v1.Main)"
+}

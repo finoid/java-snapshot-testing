@@ -11,20 +11,19 @@ import io.github.finoid.snapshots.serializers.SnapshotSerializer;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import org.jspecify.annotations.Nullable;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 @Slf4j
-@SuppressWarnings("NullAway") // TODO (nw) refactor
 public class SnapshotContext {
-
-    private static final List<String> RESERVED_WORDS = Arrays.asList("=", "[", "]");
+    private static final List<String> RESERVED_WORDS = List.of("=", "[", "]");
 
     private final SnapshotConfig snapshotConfig;
     private final SnapshotFile snapshotFile;
@@ -38,9 +37,11 @@ public class SnapshotContext {
 
     @Setter
     @Getter
-    private String scenario;
+    private @Nullable String scenario;
     @Getter
-    private SnapshotHeader header = new SnapshotHeader();
+    private final SnapshotHeader header = new SnapshotHeader();
+    @Getter
+    private final Map<String, Object> masks = new LinkedHashMap<>();
     @Setter
     private SnapshotSerializer snapshotSerializer;
     @Setter
@@ -48,7 +49,6 @@ public class SnapshotContext {
     @Setter
     private List<SnapshotReporter> snapshotReporters;
 
-    @SuppressWarnings("NullAway") // TODO (nw) refactor
     SnapshotContext(
         SnapshotConfig snapshotConfig,
         SnapshotFile snapshotFile,
@@ -69,7 +69,6 @@ public class SnapshotContext {
     }
 
     public void toMatchSnapshot() {
-
         Set<Snapshot> rawSnapshots = snapshotFile.getSnapshots();
         Snapshot previousSnapshot = getRawSnapshot(rawSnapshots);
         Snapshot currentSnapshot = takeSnapshot();
@@ -89,7 +88,7 @@ public class SnapshotContext {
                 List<SnapshotReporter> reporters =
                     snapshotReporters.stream()
                         .filter(reporter -> reporter.supportsFormat(snapshotSerializer.getOutputFormat()))
-                        .collect(Collectors.toList());
+                        .toList();
 
                 if (reporters.isEmpty()) {
                     String comparator = snapshotComparator.getClass().getSimpleName();
@@ -143,7 +142,7 @@ public class SnapshotContext {
         }
     }
 
-    private Snapshot getRawSnapshot(Collection<Snapshot> rawSnapshots) {
+    private @Nullable Snapshot getRawSnapshot(Collection<Snapshot> rawSnapshots) {
         synchronized (rawSnapshots) {
             for (Snapshot rawSnapshot : rawSnapshots) {
                 if (rawSnapshot.getIdentifier().equals(resolveSnapshotIdentifier())) {
@@ -165,10 +164,10 @@ public class SnapshotContext {
     }
 
     private String snapshotName() {
-        SnapshotName snapshotName = testMethod.getAnnotation(SnapshotName.class);
-        return snapshotName == null
+        SnapshotName snapshotNameAnnotation = testMethod.getAnnotation(SnapshotName.class);
+        return snapshotNameAnnotation == null
             ? testClass.getName() + "." + testMethod.getName()
-            : snapshotName.value();
+            : snapshotNameAnnotation.value();
     }
 
     void checkValidContext() {

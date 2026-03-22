@@ -1,0 +1,8 @@
+{
+  "track_id": "field_masking_20260319",
+  "type": "feature",
+  "status": "new",
+  "created_at": "2026-03-19T15:35:00Z",
+  "updated_at": "2026-03-19T15:35:00Z",
+  "description": "Implement support for masking of fields using json path (based on POC in Jackson 3)."
+}

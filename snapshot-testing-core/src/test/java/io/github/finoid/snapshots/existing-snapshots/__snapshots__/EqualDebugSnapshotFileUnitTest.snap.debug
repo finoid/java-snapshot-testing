@@ -1,0 +1,13 @@
+io.github.finoid.snapshots.DebugSnapshotUnitTest.givenMismatchedSnapshot_whenMatchingSnapshot_thenDebugFileIsCreated=[
+Good Snapshot
+]
+
+
+io.github.finoid.snapshots.DebugSnapshotUnitTest.givenExistingDebugFileAndMatchingSnapshot_whenMatchingSnapshot_thenDebugFileIsNotDeleted=[
+Good Snapshot
+]
+
+
+io.github.finoid.snapshots.DebugSnapshotUnitTest.givenMatchingExistingSnapshot_whenMatchingSnapshot_thenDebugFileIsCreated=[
+Good Snapshot
+]

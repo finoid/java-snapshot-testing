@@ -1,0 +1,7 @@
+io.github.finoid.snapshots.junit5.FieldMaskingIntegrationUnitTest.givenOrderWithSensitiveData_whenMatchingSnapshotWithMasks_thenFieldsAreMasked=[
+  {
+    "orderId": "ORD-123",
+    "creditCard": "***REDACTED***",
+    "customerName": "REDACTED_NAME"
+  }
+]

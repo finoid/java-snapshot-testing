@@ -25,16 +25,14 @@ import java.util.stream.Collectors;
 @Slf4j
 @RequiredArgsConstructor
 public class SnapshotVerifier {
-
     private final Class<?> testClass;
     private final SnapshotFile snapshotFile;
     private final SnapshotConfig config;
     private final boolean failOnOrphans;
 
-    private final Collection<SnapshotContext> calledSnapshots =
-        Collections.synchronizedCollection(new ArrayList<>());
+    private final Collection<SnapshotContext> calledSnapshots = Collections.synchronizedCollection(new ArrayList<>());
 
-    public SnapshotVerifier(SnapshotConfig frameworkSnapshotConfig, Class<?> testClass) {
+    public SnapshotVerifier(final SnapshotConfig frameworkSnapshotConfig, final Class<?> testClass) {
         this(frameworkSnapshotConfig, testClass, false);
     }
 
@@ -42,20 +40,17 @@ public class SnapshotVerifier {
      * Instantiate before any tests have run for a given class.
      *
      * @param frameworkSnapshotConfig configuration to use
-     * @param failOnOrphans           should the test break if snapshots exist with no matching method in the
-     *                                test class
-     * @param testClass               reference to class under test
+     * @param testClass               reference to class under testo
+     * @param failOnOrphans           should the test break if snapshots exist with no matching method in the test class
      */
     @SneakyThrows
-    @SuppressWarnings("NullAway") // TODO (nw) refactor
-    public SnapshotVerifier(
-        SnapshotConfig frameworkSnapshotConfig, Class<?> testClass, boolean failOnOrphans) {
+    public SnapshotVerifier(final SnapshotConfig frameworkSnapshotConfig, final Class<?> testClass, final boolean failOnOrphans) {
         try {
             verifyNoConflictingSnapshotNames(testClass);
 
             UseSnapshotConfig customConfig = testClass.getAnnotation(UseSnapshotConfig.class);
-            SnapshotConfig snapshotConfig =
-                customConfig == null ? frameworkSnapshotConfig : customConfig.value().getDeclaredConstructor().newInstance();
+            SnapshotConfig snapshotConfig = customConfig == null ?
+                frameworkSnapshotConfig : customConfig.value().getDeclaredConstructor().newInstance();
 
             // Matcher.quoteReplacement required for Windows
             String testFilename =
@@ -68,18 +63,18 @@ public class SnapshotVerifier {
             String testSrcDir = snapshotConfig.getOutputDir();
             String testSrcDirNoTrailing =
                 testSrcDir.endsWith("/") ? testSrcDir.substring(0, testSrcDir.length() - 1) : testSrcDir;
-            SnapshotFile snapshotFile =
-                new SnapshotFile(
-                    testSrcDirNoTrailing,
-                    snapshotDir.getPath() + File.separator + fileUnderTest.getName(),
-                    testClass);
+
+            SnapshotFile snapshotFile = new SnapshotFile(
+                testSrcDirNoTrailing,
+                snapshotDir.getPath() + File.separator + fileUnderTest.getName(),
+                testClass);
 
             this.testClass = testClass;
             this.snapshotFile = snapshotFile;
             this.config = snapshotConfig;
             this.failOnOrphans = failOnOrphans;
 
-        } catch (IOException | InstantiationException | IllegalAccessException e) {
+        } catch (final IOException | ReflectiveOperationException e) {
             throw new SnapshotExtensionException(e.getMessage());
         }
     }
@@ -101,16 +96,15 @@ public class SnapshotVerifier {
                             "Oops, looks like you set the same name of two separate snapshots @SnapshotName(\"{}\") in class {}",
                             it.getKey(),
                             testClass.getName()))
-                .count()
-                > 0;
+                .anyMatch(it -> true);
+
         if (hasDuplicateSnapshotNames) {
             throw new SnapshotExtensionException("Duplicate @SnapshotName annotations found!");
         }
     }
 
-    @SneakyThrows
-    public SnapshotContext expectCondition(Method testMethod, Object object) {
-        SnapshotContext snapshotContext =
+    public SnapshotContext expectCondition(final Method testMethod, final Object object) {
+        final SnapshotContext snapshotContext =
             new SnapshotContext(config, snapshotFile, testClass, testMethod, object);
         calledSnapshots.add(snapshotContext);
         return snapshotContext;
@@ -124,21 +118,24 @@ public class SnapshotVerifier {
                 .collect(Collectors.toSet());
         List<Snapshot> unusedSnapshots = new ArrayList<>();
 
-        for (Snapshot rawSnapshot : rawSnapshots) {
-            boolean foundSnapshot = false;
-            for (String snapshotName : snapshotNames) {
-                if (rawSnapshot.getIdentifier().equals(snapshotName)) {
-                    foundSnapshot = true;
-                    break;
+        synchronized (rawSnapshots) {
+            for (Snapshot rawSnapshot : rawSnapshots) {
+                boolean foundSnapshot = false;
+                for (String snapshotName : snapshotNames) {
+                    if (rawSnapshot.getIdentifier().equals(snapshotName)) {
+                        foundSnapshot = true;
+                        break;
+                    }
+                }
+                if (!foundSnapshot) {
+                    unusedSnapshots.add(rawSnapshot);
                 }
             }
-            if (!foundSnapshot) {
-                unusedSnapshots.add(rawSnapshot);
-            }
         }
-        if (unusedSnapshots.size() > 0) {
+
+        if (!unusedSnapshots.isEmpty()) {
             List<String> unusedRawSnapshots =
-                unusedSnapshots.stream().map(Snapshot::raw).collect(Collectors.toList());
+                unusedSnapshots.stream().map(Snapshot::raw).toList();
             String errorMessage =
                 "All unused Snapshots:\n"
                     + String.join("\n", unusedRawSnapshots)

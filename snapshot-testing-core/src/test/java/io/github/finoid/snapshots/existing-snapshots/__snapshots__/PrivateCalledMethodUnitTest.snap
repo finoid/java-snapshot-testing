@@ -1,0 +1,3 @@
+io.github.finoid.snapshots.PrivateCalledMethodUnitTest.givenTestContent_whenCallingPrivateMethod_thenSnapshotIsMatched=[
+testContent
+]

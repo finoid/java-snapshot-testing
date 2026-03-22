@@ -1,0 +1,24 @@
+package io.github.finoid.snapshots.junit5;
+
+import io.github.finoid.snapshots.Expect;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+
+@ExtendWith({SnapshotExtension.class})
+public class BaseClassUnitTest {
+
+    class TestBase {
+        Expect expect;
+    }
+
+    @Nested
+    @ExtendWith(SnapshotExtension.class)
+    class NestedClass extends TestBase {
+
+        @Test
+        public void givenExpectFromBaseClass_whenMatchingSnapshot_thenSnapshotMatches() {
+            expect.toMatchSnapshot("Hello World");
+        }
+    }
+}

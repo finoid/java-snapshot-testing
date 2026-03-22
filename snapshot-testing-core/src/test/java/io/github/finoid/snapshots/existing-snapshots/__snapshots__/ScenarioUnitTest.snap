@@ -1,0 +1,28 @@
+io.github.finoid.snapshots.ScenarioUnitTest.givenScenarioName_whenMatchingSnapshots_thenMultipleSnapshotsAreTaken=[
+Default Snapshot
+]
+
+
+io.github.finoid.snapshots.ScenarioUnitTest.givenScenarioName_whenMatchingSnapshots_thenMultipleSnapshotsAreTaken[additional]=[
+Additional Snapshot
+]
+
+
+io.github.finoid.snapshots.ScenarioUnitTest.givenIdenticalSnapshots_whenMatchingTwice_thenSnapshotMatches=[
+Default Snapshot
+]
+
+
+io.github.finoid.snapshots.ScenarioUnitTest.givenIdenticalSnapshots_whenMatchingTwice_thenSnapshotMatches[scenario]=[
+Scenario Snapshot
+]
+
+
+io.github.finoid.snapshots.ScenarioUnitTest.givenDifferentSnapshotsAtDefaultLevel_whenMatching_thenSnapshotMatchExceptionIsThrown=[
+Default Snapshot
+]
+
+
+io.github.finoid.snapshots.ScenarioUnitTest.givenDifferentSnapshotsAtScenarioLevel_whenMatching_thenSnapshotMatchExceptionIsThrown[scenario]=[
+Default Snapshot
+]

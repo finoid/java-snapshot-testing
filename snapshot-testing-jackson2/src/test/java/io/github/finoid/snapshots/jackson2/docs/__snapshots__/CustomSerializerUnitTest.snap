@@ -1,0 +1,19 @@
+docs.jackson.io.github.finoid.snapshots.CustomSerializerUnitTest.test1=[
+  {
+    "somethingElse": "This should render"
+  }
+]
+
+
+io.github.finoid.snapshots.jackson2.docs.CustomSerializerUnitTest.givenBaseEntity_whenMatchingSnapshotWithCustomSerializer_thenSnapshotMatches=[
+  {
+    "somethingElse": "This should render"
+  }
+]
+
+
+io.github.finoid.snapshots.jackson2.docs.CustomSerializerUnitTest.test1=[
+  {
+    "somethingElse": "This should render"
+  }
+]

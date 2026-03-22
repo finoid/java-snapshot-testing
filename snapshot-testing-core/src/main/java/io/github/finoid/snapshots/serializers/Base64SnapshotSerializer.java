@@ -1,20 +1,33 @@
 package io.github.finoid.snapshots.serializers;
 
-import io.github.finoid.snapshots.logging.LoggingHelper;
-import lombok.extern.slf4j.Slf4j;
+import io.github.finoid.snapshots.Snapshot;
+import io.github.finoid.snapshots.SnapshotSerializerContext;
+
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 
 /**
  * This Serializer converts a byte[] into a base64 encoded string. If the input is not a byte[] it
  * will be converted using `.getBytes(StandardCharsets.UTF_8)` method
  */
-@Slf4j
-@Deprecated
-public class Base64SnapshotSerializer
-    extends io.github.finoid.snapshots.serializers.v1.Base64SnapshotSerializer {
-    public Base64SnapshotSerializer() {
-        super();
-        LoggingHelper.deprecatedV5(
-            log,
-            "Update to `v1.serializers.io.github.finoid.snapshots.Base64SnapshotSerializer` in `snapshot.properties`");
+public class Base64SnapshotSerializer implements SnapshotSerializer {
+    private static final ToStringSnapshotSerializer TO_STRING_SNAPSHOT_SERIALIZER = new ToStringSnapshotSerializer();
+
+    @Override
+    public Snapshot apply(Object object, SnapshotSerializerContext gen) {
+        if (object == null) {
+            TO_STRING_SNAPSHOT_SERIALIZER.apply("", gen);
+        }
+        byte[] bytes =
+            object instanceof byte[]
+                ? (byte[]) object
+                : object.toString().getBytes(StandardCharsets.UTF_8);
+        String encoded = Base64.getEncoder().encodeToString(bytes);
+        return TO_STRING_SNAPSHOT_SERIALIZER.apply(encoded, gen);
+    }
+
+    @Override
+    public String getOutputFormat() {
+        return SerializerType.BASE64.name();
     }
 }

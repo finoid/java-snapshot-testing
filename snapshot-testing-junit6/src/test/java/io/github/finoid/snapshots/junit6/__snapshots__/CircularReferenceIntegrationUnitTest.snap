@@ -1,0 +1,9 @@
+io.github.finoid.snapshots.junit6.CircularReferenceIntegrationUnitTest.givenCircularReference_whenMatchingSnapshot_thenSnapshotMatches=[
+  {
+    "child" : {
+      "child" : "[CIRCULAR_REF]",
+      "id" : "b"
+    },
+    "id" : "a"
+  }
+]

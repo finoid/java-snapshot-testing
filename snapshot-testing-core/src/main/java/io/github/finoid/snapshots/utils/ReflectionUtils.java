@@ -1,6 +1,7 @@
 package io.github.finoid.snapshots.utils;
 
 import lombok.experimental.UtilityClass;
+import org.jspecify.annotations.Nullable;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
@@ -22,18 +23,17 @@ public class ReflectionUtils {
      */
     public static Optional<Field> findFieldByPredicate(
         final Class<?> clazz, final Predicate<Field> predicate) {
-        Class<?> targetClass = clazz;
+        @Nullable Class<?> targetClass = clazz;
 
-        do {
+        while (targetClass != null && targetClass != Object.class) {
             final Field[] fields = targetClass.getDeclaredFields();
             for (final Field field : fields) {
-                if (!predicate.test(field)) {
-                    continue;
+                if (predicate.test(field)) {
+                    return Optional.of(field);
                 }
-                return Optional.of(field);
             }
             targetClass = targetClass.getSuperclass();
-        } while (targetClass != null && targetClass != Object.class);
+        }
 
         return Optional.empty();
     }

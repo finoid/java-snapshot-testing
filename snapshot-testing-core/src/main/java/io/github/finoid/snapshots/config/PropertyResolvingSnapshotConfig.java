@@ -13,7 +13,6 @@ import java.util.Optional;
 
 @Slf4j
 public class PropertyResolvingSnapshotConfig implements SnapshotConfig {
-
     @Override
     public String getOutputDir() {
         return SnapshotProperties.getOrThrow("output-dir");
@@ -27,8 +26,7 @@ public class PropertyResolvingSnapshotConfig implements SnapshotConfig {
     @Override
     public Optional<String> updateSnapshot() {
         // This was the original way to update snapshots
-        Optional<String> legacyFlag =
-            Optional.ofNullable(System.getProperty(JVM_UPDATE_SNAPSHOTS_PARAMETER));
+        Optional<String> legacyFlag = Optional.ofNullable(System.getProperty(JVM_UPDATE_SNAPSHOTS_PARAMETER));
         if (legacyFlag.isPresent()) {
             LoggingHelper.deprecatedV5(
                 log,
@@ -73,6 +71,7 @@ public class PropertyResolvingSnapshotConfig implements SnapshotConfig {
     @Override
     public boolean isCI() {
         String envVariable = SnapshotProperties.getOrThrow("ci-env-var");
+
         return System.getenv(envVariable) != null;
     }
 }

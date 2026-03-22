@@ -2,60 +2,64 @@ package io.github.finoid.snapshots;
 
 import io.github.finoid.snapshots.exceptions.MissingSnapshotPropertiesKeyException;
 import lombok.extern.slf4j.Slf4j;
+import org.jspecify.annotations.Nullable;
 
 import java.io.InputStream;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
-import java.util.stream.Collectors;
 
 @Slf4j
-@SuppressWarnings({"checkstyle:all", "ImmutableEnumChecker"}) // TODO (nw) rewrite
 public enum SnapshotProperties {
     INSTANCE;
 
-    Properties snapshotProperties = new Properties();
+    private final Properties properties = new Properties();
 
     SnapshotProperties() {
-        try {
-            InputStream in =
-                SnapshotProperties.class.getClassLoader().getResourceAsStream("snapshot.properties");
-            snapshotProperties.load(in);
+        try (final InputStream in = SnapshotProperties.class.getClassLoader().getResourceAsStream("snapshot.properties")) {
+            if (in != null) {
+                properties.load(in);
+            }
         } catch (Exception e) {
             // It's ok, if the SnapshotConfig implementation attempts to get a property they will receive
             // a MissingSnapshotPropertiesKeyException
         }
     }
 
-    public static String getOrThrow(String key) {
-        Object value = INSTANCE.snapshotProperties.get(key);
+    public static String getOrThrow(final String key) {
+        final String value = INSTANCE.properties.getProperty(key);
         if (value == null) {
             throw new MissingSnapshotPropertiesKeyException(key);
         }
-        return value.toString();
+        return value;
     }
 
-    @SuppressWarnings("TypeParameterUnusedInFormals") // TODO (nw) rewrite
-    public static <T> T getInstance(String key) {
-        String value = SnapshotProperties.getOrThrow(key);
-        return createInstance(value);
+    public static <T> T getInstance(final String key) {
+        final String className = getOrThrow(key);
+        return createInstance(className);
     }
 
-    public static <T> List<T> getInstances(String key) {
-        String value = SnapshotProperties.getOrThrow(key);
-        return Arrays.stream(value.split(","))
+    public static <T> List<T> getInstances(final String key) {
+        final String values = getOrThrow(key);
+
+        return Arrays.stream(values.split(","))
             .map(String::trim)
-            .map(it -> (T) createInstance(it))
-            .collect(Collectors.toList());
+            .map(it -> SnapshotProperties.<T>createInstance(it))
+            .toList();
     }
 
-    @SuppressWarnings({"unchecked", "TypeParameterUnusedInFormals"}) // TODO (nw) rewrite
-    private static <T> T createInstance(String className) {
+    @SuppressWarnings("unchecked")
+    private static <T> T createInstance(final String className) {
         try {
-            Class<?> clazz = Class.forName(className);
+            final Class<?> clazz = Class.forName(className);
             return (T) clazz.getDeclaredConstructor().newInstance();
         } catch (Exception e) {
             throw new RuntimeException("Unable to instantiate class " + className, e);
         }
+    }
+
+    @Nullable
+    public static String get(final String key) {
+        return INSTANCE.properties.getProperty(key);
     }
 }

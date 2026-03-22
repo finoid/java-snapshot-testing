@@ -1,0 +1,8 @@
+io.github.finoid.snapshots.UpdateSnapshotPropertyUnitTest.givenNoUpdateSnapshotProperty_whenMatchingSnapshot_thenSnapshotIsNotUpdated=[
+FakeObject(id=ERROR, value=1, name=anyName1, fakeObject=null)
+]
+
+
+io.github.finoid.snapshots.UpdateSnapshotPropertyUnitTest.givenUpdateSnapshotProperty_whenMatchingSnapshot_thenSnapshotIsUpdated=[
+FakeObject(id=ERROR, value=1, name=anyName2, fakeObject=null)
+]

@@ -1,0 +1,3 @@
+io.github.finoid.snapshots.junit5.BaseClassUnitTest$NestedClass.givenExpectFromBaseClass_whenMatchingSnapshot_thenSnapshotMatches=[
+Hello World
+]

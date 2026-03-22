@@ -14,7 +14,6 @@ import java.util.Optional;
  * library
  */
 public interface SnapshotConfig {
-    @Deprecated
     String JVM_UPDATE_SNAPSHOTS_PARAMETER = "updateSnapshot";
 
     /**

@@ -1,0 +1,8 @@
+io.github.finoid.snapshots.junit5.NestedClassUnitTest$NestedClassWithExpectInstance.givenExpectArgument_whenMatchingSnapshot_thenSnapshotMatches=[
+Hello World
+]
+
+
+io.github.finoid.snapshots.junit5.NestedClassUnitTest$NestedClassWithExpectInstance.givenExpectInstance_whenMatchingSnapshot_thenSnapshotMatches=[
+Hello World
+]

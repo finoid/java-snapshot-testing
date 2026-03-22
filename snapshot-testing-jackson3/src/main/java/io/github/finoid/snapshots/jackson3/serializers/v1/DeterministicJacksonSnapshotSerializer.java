@@ -18,7 +18,13 @@ public class DeterministicJacksonSnapshotSerializer extends JacksonSnapshotSeria
      * @param builder the builder to be built
      */
     @Override
-    public void configure(final JsonMapper.Builder builder) {
+    protected boolean shouldSortCollections() {
+        return true;
+    }
+
+    @Override
+    public void configure(JsonMapper.Builder builder) {
+
         builder.enable(MapperFeature.SORT_PROPERTIES_ALPHABETICALLY);
         builder.addModule(new DeterministicCollectionModule());
     }

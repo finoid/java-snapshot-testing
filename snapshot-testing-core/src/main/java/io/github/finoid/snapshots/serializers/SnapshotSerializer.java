@@ -5,7 +5,7 @@ import io.github.finoid.snapshots.SnapshotSerializerContext;
 
 import java.util.function.BiFunction;
 
-public interface SnapshotSerializer
-    extends BiFunction<Object, SnapshotSerializerContext, Snapshot> {
+public interface SnapshotSerializer extends BiFunction<Object, SnapshotSerializerContext, Snapshot> {
+
     String getOutputFormat();
 }

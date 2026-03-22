@@ -23,12 +23,7 @@ import java.lang.reflect.Field;
 
 @Slf4j
 @SuppressWarnings({"checkstyle:all", "EmptyBlockTag", "NullAway"}) // TODO (nw) rewrite
-public class SnapshotExtension
-    implements AfterAllCallback,
-    BeforeAllCallback,
-    SnapshotConfigInjector,
-    ParameterResolver,
-    BeforeEachCallback {
+public class SnapshotExtension implements AfterAllCallback, BeforeAllCallback, SnapshotConfigInjector, ParameterResolver, BeforeEachCallback {
 
     private SnapshotVerifier snapshotVerifier;
 
